@@ -5,7 +5,7 @@ import asyncio
 import json
 import os
 
-TOKEN = "MTQ3MjUwMzAwMTA2MjE4MzAwOA.GQBzLY.KpyBvDAxDH2rX6TuFwpdWWfFpEolKrMyH0lAkI"
+TOKEN =  os.getenv("TOKEN")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, "sticky_data.json")
 
