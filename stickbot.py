@@ -72,7 +72,7 @@ class EmbedStickyModal(discord.ui.Modal, title="임베드 고정 설정"):
 
 def save_data():
     data = {
-        "messages": sticky_messages,
+        "messages": sticky_data,
         "contents": sticky_contents,
         "logs": log_channels,
         "log_enabled": log_enabled
@@ -83,7 +83,7 @@ def save_data():
 
 
 def load_data():
-    global sticky_messages, sticky_contents, log_channels, log_enabled
+    global sticky_data, sticky_contents, log_channels, log_enabled
 
     if not os.path.exists(DATA_FILE):
         return
@@ -91,7 +91,7 @@ def load_data():
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    sticky_messages = {
+    sticky_data = {
         int(gid): {int(cid): mid for cid, mid in channels.items()}
         for gid, channels in data.get("messages", {}).items()
     }
@@ -194,14 +194,14 @@ class StickyModal(discord.ui.Modal, title="고정 메시지 설정"):
         guild_id = interaction.guild.id
         channel_id = interaction.channel.id
 
-        sticky_messages.setdefault(guild_id, {})
+        sticky_data.setdefault(guild_id, {})
         sticky_contents.setdefault(guild_id, {})
 
         # 기존 고정 삭제
-        if channel_id in sticky_messages[guild_id]:
+        if channel_id in sticky_data[guild_id]:
             try:
                 old = await interaction.channel.fetch_message(
-                    sticky_messages[guild_id][channel_id]
+                    sticky_data[guild_id][channel_id]
                 )
                 await old.delete()
             except:
@@ -209,7 +209,7 @@ class StickyModal(discord.ui.Modal, title="고정 메시지 설정"):
 
         sent = await interaction.channel.send(self.message.value)
 
-        sticky_messages[guild_id][channel_id] = sent.id
+        sticky_data[guild_id][channel_id] = sent.id
         sticky_contents[guild_id][channel_id] = self.message.value
         sticky_versions[channel_id] = 0
 
@@ -268,20 +268,20 @@ async def unsticky(interaction: discord.Interaction):
     guild_id = interaction.guild.id
     channel_id = interaction.channel.id
 
-    if guild_id not in sticky_messages or \
-       channel_id not in sticky_messages[guild_id]:
+    if guild_id not in sticky_data or \
+       channel_id not in sticky_data[guild_id]:
         await interaction.response.send_message("❌ 고정 없음", ephemeral=True)
         return
 
     try:
         old = await interaction.channel.fetch_message(
-            sticky_messages[guild_id][channel_id]
+            sticky_data[guild_id][channel_id]
         )
         await old.delete()
     except:
         pass
 
-    sticky_messages[guild_id].pop(channel_id, None)
+    sticky_data[guild_id].pop(channel_id, None)
     sticky_contents[guild_id].pop(channel_id, None)
     sticky_versions.pop(channel_id, None)
 
@@ -344,14 +344,14 @@ async def delayed_sticky(guild_id, channel, version):
 
     try:
         old = await channel.fetch_message(
-            sticky_messages[guild_id][channel.id]
+            sticky_data[guild_id][channel.id]
         )
         await old.delete()
     except:
         pass
 
     sent = await channel.send(sticky_contents[guild_id][channel.id])
-    sticky_messages[guild_id][channel.id] = sent.id
+    sticky_data[guild_id][channel.id] = sent.id
 # on_message
 @bot.event
 async def on_message(message):
@@ -381,8 +381,8 @@ async def on_message(message):
     # =========================
     # 🔹 기존 delayed_sticky 시스템
     # =========================
-    if guild_id in sticky_messages and \
-       channel_id in sticky_messages[guild_id]:
+    if guild_id in sticky_data and \
+       channel_id in sticky_data[guild_id]:
 
         current_version = sticky_versions.get(channel_id, 0) + 1
         sticky_versions[channel_id] = current_version
