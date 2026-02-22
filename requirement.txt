@@ -2,3 +2,5 @@ discord
 discord.py
 asyncio
 dotenv
+pushbullet
+requests
