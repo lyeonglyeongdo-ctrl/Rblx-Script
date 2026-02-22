@@ -20,18 +20,8 @@ intents.messages = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # ================== 데이터 ==================
+sticky_data = {}
 
-sticky_data = {
-    guild_id: {
-        channel_id: {
-            "type": "text" or "embed",
-            "content": "...",          # text용
-            "title": "...",            # embed용
-            "description": "...",
-            "message_id": 123456
-        }
-    }
-}
 
 log_channels = {}      # {guild_id: channel_id}
 log_enabled = {}       # {guild_id: True/False}
