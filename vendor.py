@@ -4,6 +4,10 @@ from discord import app_commands
 from pushbullet import Pushbullet
 import sqlite3
 import re
+import asyncio
+import json
+import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
